@@ -123,8 +123,17 @@
 		
 		//use lookup
 		if(settings.show_works){
+			
+			// button
 			var show_works_btn = $('<button>').addClass(settings.lookup_class).html(settings.shown_works_btn_html);
-			p.append(show_works_btn);
+			
+			// test field
+			
+			var show_works_html = '<div class="orcid_show_works_result"></div>';
+			
+			//var search_div = $('<div>').addClass(settings.search_div_class).html(show_works_html);
+			
+			p.append(show_works_btn).append(show_works_html);
 			$(show_works_btn).on('click', function(e){
 				e.preventDefault();
 				_show_works(obj, settings);
@@ -421,11 +430,6 @@
 					if(settings.success_handler && (typeof settings.success_handler === 'function')){
 						settings.success_handler(data, obj, settings);
 					}
-					var temp = '';
-					
-					
-					
-					$('.orcid_search_result', p).html(data);
 				},
 				error: function(xhr){
 					if(settings.error_handler && (typeof settings.error_handler === 'function')){
@@ -439,13 +443,14 @@
 				var _htmlOutput = '';
 				
 				for (var i =0 ; i < works.length; i++){
-					_htmlOutput += works[i]['work-title']['title']['value'] + '</br>'
-					_htmlOutput += works[i]['work-citation']['citation'] + '</br>'
+					_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
+					_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
 					var jsonBibtex = bibtexParse.toJSON(works[i]['work-citation']['citation']);
-					_htmlOutput += JSON.stringify(jsonBibtex) + '</br>'
+					_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
+					_htmlOutput += '<hr>'
 				}
 				
-				$('.orcid_search_result', p).html(_htmlOutput);
+				$('.orcid_show_works_result', p).html(_htmlOutput);
 				
 			});
 		}
