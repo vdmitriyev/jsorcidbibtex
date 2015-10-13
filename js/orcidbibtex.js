@@ -23,7 +23,7 @@ THE SOFTWARE.
 *****************************************/
 
 /**
- * jQuery plugin for extracting BibTeX data from particular ORCID ID
+ * jQuery plugin for extracting BibTeX data from particular ORCID Account
  *
  * @author Viktor Dmitriyev
  */
@@ -52,13 +52,13 @@ function readyOnLoad( jQuery ) {
 	/**
 	 * extracts and shows BibTeX of particular ORCID ID
 	 *
-	 * @param  {object} obj      javascript object represent the input target field
-	 * @param  {object} settings local settings of the plugin
+	 * @param  {object} orcidAccount      orcid account number
 	 * @return {void}            this will modify the DOM based on the search result
 	 */
 	function showORCIDWorks(orcidAccount){
 		
 		console.log('Starting showORCIDWorks');
+		$('.htmlOutputTemplate').hide();
 			
 		$('.bibtexArea').html('<center>' + loadingInfoMsgHTML + '</br>' + loadingWarningMsgHTML + '<a href="http://orcid.org/' + orcidAccount + '">here</a>' + '</center>');
 		
@@ -81,12 +81,33 @@ function readyOnLoad( jQuery ) {
 				_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
 				var jsonBibtex = bibtexParse.toJSON(works[i]['work-citation']['citation']);
 				_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
+				_htmlOutput += '<strong>HTML: </strong>' + adaptBibTexToTemplate(jsonBibtex) + '</br></br>'
+				
 				_htmlOutput += '<hr>'
 			}
 			
 			$('.bibtexArea').html(_htmlOutput);
-			
 		});
+	}
+	
+	function adaptBibTexToTemplate(jsonBibtex){
+		
+		var template = $('.htmlOutputTemplate').html();
+		var obj = $.parseJSON(JSON.stringify(jsonBibtex));
+		var htmlOutput = '';
+		
+		console.log(template);
+		console.log(obj);
+		console.log(obj[0]);
+		var  tplValues = ['Title', 'Author', 'Journal', 'Year', 'Doi', 'Url']
+		
+		for (var i = 0 ; i < tplValues.length; i++){
+			var field = tplValues[i];
+			template = template.replace( '{' + field + '}', obj[0]['entryTags'][field]);
+		}
+		
+		return template;
+		
 	}
 }
 
