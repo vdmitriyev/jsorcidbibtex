@@ -2,29 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>jQuery.getJSON demo</title>
+  <title>ORCID BibTeX Demo</title>
   
   
 	<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-	<script type="text/javascript" src="js/orcid_widget.js"></script>
+	<!--<script type="text/javascript" src="js/orcid_widget.js"></script>-->
+	<script type="text/javascript" src="js/orcidbibtex.js"></script>
 	<script type="text/javascript" src="js/bibtexParse.js"></script>
 	<link rel="stylesheet" type="text/css" href="css/orcid_widget.css"/>
 </head>
 <body>
-	<input type="text" name="name" id="custom_settings_orcid" value="0000-0001-5661-4587" size="40" class=""/>
+	<input type="hidden" name="name" id="orcidAccount" value="0000-0001-5661-4587" size="40" class=""/>
+	<div class="bibtexArea">&nbsp;</div>
 </body>
-<script>
-	$('#custom_settings_orcid').orcid_widget({
-		pre_lookup: false,
-		pre_open_search:false,
-		//lookup_text: 'Custom Lookup',
-		//search_text: 'Custom Search',
-		//before_html: 'Enter Here: ',
-		show_works: true,
-		shown_works_btn_html: 'Get Works',
-		
-	});
-	</script>
 </html>
 
 
