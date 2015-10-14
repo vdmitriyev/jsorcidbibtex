@@ -127,32 +127,33 @@ function readyOnLoad( jQuery ) {
 		var obj = $.parseJSON(JSON.stringify(jsonBibtex));
 		var htmlOutput = '';
 		
-		console.log(template);
-		console.log(obj);
 		console.log(obj[0]);
-		var  tplValues = ['Title', 'Author', 'Journal', 'Year', 'Doi', 'Url'];
+		console.log(template);
+		
+		var  tplValues = new Array('Title', 'Author', 'Journal', 'Year', 'Doi', 'Url');
 		
 		//console.log(tplValues.length);
 		
 		for (var i = 0 ; i < tplValues.length; i++){
-			
+			console.log(i);
 			var field = tplValues[i];
+			console.log(field);
 			var value = "";
 			
 			try {
 				var value = obj[0]['entryTags'][field.toLowerCase()];
 			}catch(err){
-				console.error(err);
+				console.log(err);
 			}
 			
 			if (field == 'Author'){
 				// forming proper naming
 				var splittedValue = value.split(' and ');				
 				var tempValue = "";
-				for (i = 0; i < splittedValue.length; i++){
-					var singleValue = splittedValue[i].split(',');
+				for (var j = 0; j < splittedValue.length; j++){
+					var singleValue = splittedValue[j].split(',');
 					//console.log(singleValue);
-					var singleName = splittedValue[i];
+					var singleName = splittedValue[j];
 					
 					if (singleValue.length == 2){
 						try {
@@ -172,11 +173,26 @@ function readyOnLoad( jQuery ) {
 				value = replaceLaTeXSpecials(value);
 			}
 			
-			console.log(field);
-			console.log(value);
+			if (field == 'Doi'){
+				
+				if (value.startsWith('http')){
+					value = '<a href="' + value + '">DOI</a>';
+				} else {
+					value = '<a href="http://dx.doi.org/' + value + '">DOI</a>';
+				}
+			}
 			
-			template = template.replace( '{' + field + '}', value == 'undefined' ? " " : value);
+			if (field == 'Url'){
+				value = '<a href="' + value + '">URL</a>';
+			}
 			
+			
+			
+		
+			template = template.replace( '{' + field + '}', typeof value === "undefined" ? " " : value);
+						
+			console.log(i);
+			console.log(template);
 		}
 		
 		return template;
@@ -184,8 +200,7 @@ function readyOnLoad( jQuery ) {
 	
 	function replaceLaTeXSpecials(input){
 		
-		// special german symbols
-		// special spanish symbols
+		// special german and spanish symbols
 		var UMLAUT_TO_LATEX = { 
 				'Ö' : ['\\"{O}'],
 				'ö' : ['\\"{o}'],
@@ -200,16 +215,12 @@ function readyOnLoad( jQuery ) {
 		var result = input;
 		
 		for (var key in UMLAUT_TO_LATEX) {
-			for (i = 0; i < UMLAUT_TO_LATEX[key].length; i++){
+			for (var i = 0; i < UMLAUT_TO_LATEX[key].length; i++){
 				result = result.replace(UMLAUT_TO_LATEX[key][i], key);
 				//console.log(UMLAUT_TO_LATEX[key]);
 			}
 		}
 		
-		
-		//result = result.replace(, );
-		
-		//console.log(result);	
 		return result;
 	}
 }
