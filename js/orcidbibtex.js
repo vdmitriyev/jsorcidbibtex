@@ -32,6 +32,10 @@ function readyOnLoad( jQuery ) {
     //settings
     var WIDGET_NAME = "ORCID BibTeX Extractor";
     var WIDGET_ID = "ORCID_BibTeX";
+	var ORCID_URL_LAB = "http://feed.labs.orcid-eu.org/";
+	var ORCID_URL_PUB = "http://pub.orcid.org/";
+	
+	
 	var loadingInfoMsgHTML = 'Please wait while BibTeX is loading ...'
 	var loadingWarningMsgHTML = 'In case loading takes too much time try ORCID directly ';
 	var loadingErrorMsgHTML = 'Something went wrong. Please, contact web administrator.';
@@ -63,31 +67,58 @@ function readyOnLoad( jQuery ) {
 		$('.bibtexArea').html('<center>' + loadingInfoMsgHTML + '</br>' + loadingWarningMsgHTML + '<a href="http://orcid.org/' + orcidAccount + '">here</a>' + '</center>');
 		
 		$.ajax({
-			url: "http://pub.orcid.org/" + encodeURIComponent(orcidAccount) + '/orcid-works', 
-	
+			url: ORCID_URL_PUB + encodeURIComponent(orcidAccount) + '/orcid-works', 
+			//url: ORCID_URL_LAB + encodeURIComponent(orcidAccount) + '?format=json', 
+			//url: ORCID_URL_LAB + encodeURIComponent(orcidAccount), 
+			//headers: { 
+			  //      Accept : "text/x-bibliography; style=ieee"
+			    //},
+			//type: "GET",
+	        //crossDomain: true,
 			dataType: 'jsonp',
-			success: function(data){					
+			success: function(data){
 				console.log('success');
 			},
 			error: function(xhr){
 				console.error(xhr);
 			}
 		}).done(function(data) {
-			var works = data['orcid-profile']['orcid-activities']['orcid-works']['orcid-work'];
-			var _htmlOutput = '';
 			
-			for (var i =0 ; i < works.length; i++){
-				_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
-				_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
-				var jsonBibtex = bibtexParse.toJSON(works[i]['work-citation']['citation']);
-				_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
-				_htmlOutput += '<strong>HTML: </strong>' + adaptBibTexToTemplate(jsonBibtex) + '</br></br>'
-				
-				_htmlOutput += '<hr>'
-			}
+			console.log('done');
+			//processORCIDFormatted(data);
+			processORCIDBibtex(data);
 			
-			$('.bibtexArea').html(_htmlOutput);
 		});
+	}
+	
+	function processORCIDFormatted(data){
+		
+		console.log('processORCIDFormatted');
+		console.log(data);
+		$('.bibtexArea').html(data);
+		
+		var jsonBibtex = bibtexParse.toJSON(data);
+		console.log(jsonBibtex);
+		$('.bibtexArea').html(JSON.stringify(jsonBibtex));
+	}
+		
+	function processORCIDBibtex(data){
+		
+		var works = data['orcid-profile']['orcid-activities']['orcid-works']['orcid-work'];
+		var _htmlOutput = '';
+		
+		for (var i =0 ; i < works.length; i++){
+			_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
+			_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
+			var jsonBibtex = bibtexParse.toJSON(works[i]['work-citation']['citation']);
+			_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
+			_htmlOutput += '<strong>HTML: </strong>' + adaptBibTexToTemplate(jsonBibtex) + '</br></br>'
+			
+			_htmlOutput += '<hr>'
+		}
+		
+		$('.bibtexArea').html(_htmlOutput);
+		
 	}
 	
 	function adaptBibTexToTemplate(jsonBibtex){
@@ -99,15 +130,87 @@ function readyOnLoad( jQuery ) {
 		console.log(template);
 		console.log(obj);
 		console.log(obj[0]);
-		var  tplValues = ['Title', 'Author', 'Journal', 'Year', 'Doi', 'Url']
+		var  tplValues = ['Title', 'Author', 'Journal', 'Year', 'Doi', 'Url'];
+		
+		//console.log(tplValues.length);
 		
 		for (var i = 0 ; i < tplValues.length; i++){
+			
 			var field = tplValues[i];
-			template = template.replace( '{' + field + '}', obj[0]['entryTags'][field]);
+			var value = "";
+			
+			try {
+				var value = obj[0]['entryTags'][field.toLowerCase()];
+			}catch(err){
+				console.error(err);
+			}
+			
+			if (field == 'Author'){
+				// forming proper naming
+				var splittedValue = value.split(' and ');				
+				var tempValue = "";
+				for (i = 0; i < splittedValue.length; i++){
+					var singleValue = splittedValue[i].split(',');
+					//console.log(singleValue);
+					var singleName = splittedValue[i];
+					
+					if (singleValue.length == 2){
+						try {
+							singleName = singleValue[1] + ' ' + singleValue[0];
+						} catch(err) {
+							console.error(err);
+						}
+					}
+					tempValue = tempValue + singleName + ', ';
+				}
+				
+				value = tempValue.substring(0, tempValue.length - 2);
+				value = replaceLaTeXSpecials(value);
+			} 
+			
+			if (field == 'Title'){
+				value = replaceLaTeXSpecials(value);
+			}
+			
+			console.log(field);
+			console.log(value);
+			
+			template = template.replace( '{' + field + '}', value == 'undefined' ? " " : value);
+			
 		}
 		
 		return template;
+	}
+	
+	function replaceLaTeXSpecials(input){
 		
+		// special german symbols
+		// special spanish symbols
+		var UMLAUT_TO_LATEX = { 
+				'Ö' : ['\\"{O}'],
+				'ö' : ['\\"{o}'],
+				'ä' : ['\\"{a}'],
+				'Ä' : ['\\"{A}'],
+				'Ü' : ['\\"{U}'],
+				'ü' : ['\\"{u}'],
+				'ß' : ['{\\ss}'],
+				'ó' : ["{\\'o}", "\\'{o}", "\\'o"]
+		};
+		
+		var result = input;
+		
+		for (var key in UMLAUT_TO_LATEX) {
+			for (i = 0; i < UMLAUT_TO_LATEX[key].length; i++){
+				result = result.replace(UMLAUT_TO_LATEX[key][i], key);
+				//console.log(UMLAUT_TO_LATEX[key]);
+			}
+		}
+		
+		
+		//result = result.replace(, );
+		
+		//console.log(result);	
+		return result;
 	}
 }
 

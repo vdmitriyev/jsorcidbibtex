@@ -13,16 +13,18 @@
 	<script type="text/javascript" src="js/bibtexParse.js"></script>
 	
 	<!-- Loading JS libraries from github -->
-	<script type="text/javascript" src="https://rawgit.com/vdmitriyev/jsorcidbibtex/master/js/orcidbibtex.js"></script>
-	<script type="text/javascript" src="https://rawgit.com/vdmitriyev/jsorcidbibtex/master/js/bibtexParse.js"></script>
+	<!--<script type="text/javascript" src="https://rawgit.com/vdmitriyev/jsorcidbibtex/master/js/orcidbibtex.js"></script>-->
+	<!--<script type="text/javascript" src="https://rawgit.com/vdmitriyev/jsorcidbibtex/master/js/bibtexParse.js"></script>-->
   
 </head>
 
 <body>
 	<input type="hidden" name="name" id="orcidAccount" value="0000-0001-5661-4587" size="40" class=""/>
+	<input type="hidden" name="name" id="orcidAccount2" value="0000-0002-8799-0478" size="40" class=""/>
+	
 	
 	<div class="htmlOutputTemplate">
-		{Author}, <b>{Title}</b>, {Journal}, {Year}, <a href="http://dx.doi.org/{Doi}">DOI</a>, <a href="{Url}">URL</a>
+		{Author}, <b>{Title}</b>, {Journal}, {Year}, {Doi}, {Url}
 	</div>
 	
 	<div class="bibtexArea">&nbsp;</div>
