@@ -108,20 +108,19 @@ function readyOnLoad( jQuery ) {
 		var _htmlOutput = '';
 		
 		for (var i =0 ; i < works.length; i++){
-			_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
-			_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
+			//_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
+			//_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
 			var jsonBibtex = bibtexParse.toJSON(works[i]['work-citation']['citation']);
-			_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
-			_htmlOutput += '<strong>HTML: </strong>' + adaptBibTexToTemplate(jsonBibtex) + '</br></br>'
-			
-			_htmlOutput += '<hr>'
+			//_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
+			_htmlOutput += adaptBibTexToTemplate(jsonBibtex, works[i]['work-citation']['citation']) + '</br>'			
+			//_htmlOutput += '<hr>'
 		}
 		
 		$('.bibtexArea').html(_htmlOutput);
 		
 	}
 	
-	function adaptBibTexToTemplate(jsonBibtex){
+	function adaptBibTexToTemplate(jsonBibtex, bibtex){
 		
 		var template = $('.htmlOutputTemplate').html();
 		var obj = $.parseJSON(JSON.stringify(jsonBibtex));
@@ -130,7 +129,7 @@ function readyOnLoad( jQuery ) {
 		console.log(obj[0]);
 		console.log(template);
 		
-		var  tplValues = new Array('Title', 'Author', 'Journal', 'Year', 'Doi', 'Url');
+		var  tplValues = new Array('Title', 'Author', 'Journal', 'Year', 'Doi', 'Url', 'Bibtex');
 		
 		//console.log(tplValues.length);
 		
@@ -186,13 +185,17 @@ function readyOnLoad( jQuery ) {
 				value = '<a href="' + value + '">URL</a>';
 			}
 			
-			
-			
+			if (field == 'Bibtex'){
+				var randomUID = uniqID(20) + "";
+				value = '<a href="#" onclick="toggleVisibility(' + randomUID + ');return false;">BibTeX</a>';
+				value += '<div id="' + randomUID + '" style="display:none;">';
+				value += '<pre>' + bibtex.split('},').join('},\n') + '</pre>';
+				value += '</div>';
+			}
 		
-			template = template.replace( '{' + field + '}', typeof value === "undefined" ? " " : value);
-						
-			console.log(i);
-			console.log(template);
+			template = template.replace( '{' + field + '}', typeof value === "undefined" ? " " : value);						
+			//console.log(i);
+			//console.log(template);
 		}
 		
 		return template;
