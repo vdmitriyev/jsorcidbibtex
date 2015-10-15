@@ -85,7 +85,9 @@ function readyOnLoad( jQuery ) {
 		}).done(function(data) {
 			
 			console.log('done');
+			
 			//processORCIDFormatted(data);
+			
 			processORCIDBibtex(data);
 			
 		});
@@ -106,17 +108,37 @@ function readyOnLoad( jQuery ) {
 		
 		var works = data['orcid-profile']['orcid-activities']['orcid-works']['orcid-work'];
 		var _htmlOutput = '';
+		var _htmlTmp = '';
+		var convertedResults = {};
+		
 		for (var i =0 ; i < works.length; i++){
-			//_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
-			//_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
+			//_htmlTmp += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
+			//_htmlTmp += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
+			//_htmlTmp += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
 			var jsonBibtex = bibtexParse.toJSON(works[i]['work-citation']['citation']);
-			//_htmlOutput += '<strong>JSON: </strong>' + JSON.stringify(jsonBibtex) + '</br></br>'
-			_htmlOutput += adaptBibTexToTemplate(jsonBibtex, works[i]['work-citation']['citation']) + '</br>'			
-			//_htmlOutput += '<hr>'
+			
+			_htmlTmp = adaptBibTexToTemplate(jsonBibtex, works[i]['work-citation']['citation']) + '</br>'			
+			
+			var newYear = JSON.stringify(works[i]['publication-date']['year']['value']);
+			
+			if (!(newYear in convertedResults)){
+				convertedResults[newYear] = new Array();
+			}
+
+			convertedResults[newYear].push(_htmlTmp)
+		}
+		
+		var keys = Object.keys(convertedResults),
+		keys.sort().reverse();
+		
+		for (var i = 0; i < keys.length; i++) {
+			k = keys[i];
+			for (var j = 0 ; j < convertedResults[k].length; j++){
+				_htmlOutput += '<div>' + convertedResults[k][j]	+ '</div>';
+			}
 		}
 		
 		$('.bibtexArea').html(_htmlOutput);
-		
 	}
 	
 	function adaptBibTexToTemplate(jsonBibtex, bibtex){
