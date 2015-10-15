@@ -4,7 +4,7 @@ JS library that access particular ORCID account and then parses and renders avai
 
 ### Usage
 
-Please follow the same code convention given in example.html file.
+Please follow the HTML code given in the example.html file.
 
 ### Credits
 
@@ -15,8 +15,10 @@ Please follow the same code convention given in example.html file.
 
 ### TODO
 
-* []  Proper authors naming in latex, sample implementation in JabRef can be found [here](https://github.com/JabRef/jabref/blob/master/src/main/java/net/sf/jabref/model/entry/AuthorList.java).
-* [] Possible integration with CSL
+* [X]  Proper authors naming in latex
+    - Some proper naming was done, but this part still can be improved
+    - Sample implementation in JabRef can be found [here](https://github.com/JabRef/jabref/blob/master/src/main/java/net/sf/jabref/model/entry/AuthorList.java).
+* [] Possible integration with CSL, for a moment own straightforward template is used
      - https://bitbucket.org/fbennett/citeproc-js/wiki/Home
      - http://gsl-nagoya-u.net/http/pub/citeproc-demo/demo.html
 
