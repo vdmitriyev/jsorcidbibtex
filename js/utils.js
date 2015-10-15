@@ -2,7 +2,14 @@
 
 // visibility of particular block
 function toggleVisibility(id) {
-  $(id).toggle();
+	
+	var e = document.getElementById(id);
+	if(e.style.display == 'block')
+		e.style.display = 'none';
+	else
+		e.style.display = 'block';
+	  
+  //$(id).toggle();
 }
 
 // Generating uniques ID

@@ -186,10 +186,13 @@ function readyOnLoad( jQuery ) {
 			}
 			
 			if (field == 'Bibtex'){
-				var randomUID = uniqID(20) + "";
-				value = '<a href="#" onclick="toggleVisibility(' + randomUID + ');return false;">BibTeX</a>';
+				bibtex = bibtex.split('\n').join('');
+				bibtex = bibtex.split('},').join('},\n');
+				
+				var randomUID = uniqID(20);
+				value = '<a href="#" onclick="toggleVisibility(\''+randomUID+'\');return false;">BibTeX</a>';
 				value += '<div id="' + randomUID + '" style="display:none;">';
-				value += '<pre>' + bibtex.split('},').join('},\n') + '</pre>';
+				value += '<pre>' + bibtex + '</pre>';
 				value += '</div>';
 			}
 		
