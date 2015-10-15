@@ -106,7 +106,6 @@ function readyOnLoad( jQuery ) {
 		
 		var works = data['orcid-profile']['orcid-activities']['orcid-works']['orcid-work'];
 		var _htmlOutput = '';
-		
 		for (var i =0 ; i < works.length; i++){
 			//_htmlOutput += '<strong>Title: </strong>' + works[i]['work-title']['title']['value'] + '</br></br>'
 			//_htmlOutput += '<strong>BibTeX: </strong>' + works[i]['work-citation']['citation'] + '</br></br>'
@@ -127,16 +126,14 @@ function readyOnLoad( jQuery ) {
 		var htmlOutput = '';
 		
 		console.log(obj[0]);
-		console.log(template);
+		//console.log(template);
+		
+		template = template.split(',').join('');
 		
 		var  tplValues = new Array('Title', 'Author', 'Journal', 'Year', 'Doi', 'Url', 'Bibtex');
 		
-		//console.log(tplValues.length);
-		
 		for (var i = 0 ; i < tplValues.length; i++){
-			console.log(i);
-			var field = tplValues[i];
-			console.log(field);
+			var field = tplValues[i];			
 			var value = "";
 			
 			try {
@@ -145,8 +142,8 @@ function readyOnLoad( jQuery ) {
 				console.log(err);
 			}
 			
+			// forming proper naming
 			if (field == 'Author'){
-				// forming proper naming
 				var splittedValue = value.split(' and ');				
 				var tempValue = "";
 				for (var j = 0; j < splittedValue.length; j++){
@@ -161,6 +158,9 @@ function readyOnLoad( jQuery ) {
 							console.error(err);
 						}
 					}
+					singleName = singleName.split('{').join('');
+					singleName = singleName.split('}').join('');
+					
 					tempValue = tempValue + singleName + ', ';
 				}
 				
@@ -173,15 +173,18 @@ function readyOnLoad( jQuery ) {
 			}
 			
 			if (field == 'Doi'){
-				
-				try{
-					if (value.startsWith('http')){
-						value = '<a href="' + value + '">DOI</a>';
-					} else {
-						value = '<a href="http://dx.doi.org/' + value + '">DOI</a>';
+				if (typeof value !== "undefined"){
+					try{
+						if (value.startsWith('http')){
+							value = '<a href="' + value + '">DOI</a>';
+						} else {
+							value = '<a href="http://dx.doi.org/' + value + '">DOI</a>';
+						}
+					} catch(err){
+						console.error(err);
 					}
-				} catch(err){
-					console.error(err);
+				} else {
+					console.log("DOI is not presented");
 				}
 			}
 			
@@ -199,10 +202,17 @@ function readyOnLoad( jQuery ) {
 				value += '<pre>' + bibtex + '</pre>';
 				value += '</div>';
 			}
+			
+			if (field == 'Journal'){
+				
+				value = typeof value === "undefined" ? obj[0]['entryTags']['booktitle'.toLowerCase()] : value;
+				
+				if (typeof value !== "undefined")
+					value = replaceLaTeXSpecials(value);
+			}
+				
 		
-			template = template.replace( '{' + field + '}', typeof value === "undefined" ? " " : value);						
-			//console.log(i);
-			//console.log(template);
+			template = template.replace( '{' + field + '}', typeof value === "undefined" ? " " : value + ",");
 		}
 		
 		return template;
@@ -210,16 +220,17 @@ function readyOnLoad( jQuery ) {
 	
 	function replaceLaTeXSpecials(input){
 		
-		// special german and spanish symbols
+		// special German, Spanish, etc. symbols
 		var UMLAUT_TO_LATEX = { 
 				'Ö' : ['\\"{O}'],
-				'ö' : ['\\"{o}'],
-				'ä' : ['\\"{a}'],
+				'ö' : ['\\"{o}', '\\"o'],
+				'ä' : ['\\"{a}', '\\"a'],
 				'Ä' : ['\\"{A}'],
 				'Ü' : ['\\"{U}'],
-				'ü' : ['\\"{u}'],
+				'ü' : ['\\"{u}', '\\"{u}', '\\"{u}'],
 				'ß' : ['{\\ss}'],
-				'ó' : ["{\\'o}", "\\'{o}", "\\'o"]
+				'ó' : ["{\\'o}", "\\'{o}", "\\'o"],
+				'é' : ["\\'{e}", "\\'e"]
 		};
 		
 		var result = input;
@@ -227,7 +238,7 @@ function readyOnLoad( jQuery ) {
 		for (var key in UMLAUT_TO_LATEX) {
 			for (var i = 0; i < UMLAUT_TO_LATEX[key].length; i++){
 				result = result.replace(UMLAUT_TO_LATEX[key][i], key);
-				//console.log(UMLAUT_TO_LATEX[key]);
+				result = result.replace( '{' + UMLAUT_TO_LATEX[key][i] + '}', key);
 			}
 		}
 		
