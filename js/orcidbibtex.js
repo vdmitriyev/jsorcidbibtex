@@ -174,10 +174,14 @@ function readyOnLoad( jQuery ) {
 			
 			if (field == 'Doi'){
 				
-				if (value.startsWith('http')){
-					value = '<a href="' + value + '">DOI</a>';
-				} else {
-					value = '<a href="http://dx.doi.org/' + value + '">DOI</a>';
+				try{
+					if (value.startsWith('http')){
+						value = '<a href="' + value + '">DOI</a>';
+					} else {
+						value = '<a href="http://dx.doi.org/' + value + '">DOI</a>';
+					}
+				} catch(err){
+					console.error(err);
 				}
 			}
 			
